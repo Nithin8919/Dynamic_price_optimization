@@ -1,7 +1,9 @@
 pandas 
 numpy
 scikit-learn
-kafka
+kafka-python
 matplotlib
 seaborn
 plotly
+psycopg2
+sqlalchemy
