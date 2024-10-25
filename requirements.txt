@@ -8,3 +8,6 @@ plotly
 psycopg2
 sqlalchemy
 zenml
+scipy
+statsmodels
+DPyLearn
