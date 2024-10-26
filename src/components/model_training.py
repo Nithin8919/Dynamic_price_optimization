@@ -7,7 +7,15 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 from xgboost import XGBRegressor
 from src.components.utils import save_object, evaluate_models
+from src.components.data_transformation import ColumnTransformation
+from src.components.data_transformation import DataTransformationConfig
+from src.components.data_ingestion import DataIngestion
+import sys
 
+# Ensuring the script finds logging_config correctly
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+from src.components.model_training import ModelTrainerConfig,ModelTrainer
 
 @dataclass
 class ModelTrainerConfig:

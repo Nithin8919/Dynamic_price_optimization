@@ -8,18 +8,26 @@ import os
 from dataclasses import dataclass
 from typing import List
 from sklearn.impute import SimpleImputer
-import logging
 import joblib
+import sys
 
-# Config class to specify path for the preprocessor object
+# Ensuring the script finds logging_config correctly
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from src.logging_config import logging
+
+# Config class to specify paths for the objects
 @dataclass
 class DataTransformationConfig:
     preprocessor_obj_file_path = os.path.join('artifacts', 'preprocessor.pkl')
+    train_array_file_path = os.path.join('artifacts', 'train_array.pkl')
+    test_array_file_path = os.path.join('artifacts', 'test_array.pkl')
+
 
 class PreprocessorStrategy(ABC):
     @abstractmethod
     def preprocessor(self, df: pd.DataFrame):
         pass
+
 
 class ColumnTransformation(PreprocessorStrategy):
     
@@ -27,18 +35,19 @@ class ColumnTransformation(PreprocessorStrategy):
         self.data_transformation_config = DataTransformationConfig()
 
     def save_object(self, file_path, obj):
-        """Save the preprocessing object to a file."""
+        """Save an object to a file."""
         try:
             os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure directory exists
             with open(file_path, 'wb') as file:
                 joblib.dump(obj, file)
-            logging.info(f"Preprocessing object saved to {file_path}")
+            logging.info(f"Object saved to {file_path}")
         except Exception as e:
-            logging.error("Failed to save the preprocessing object.")
+            logging.error(f"Failed to save object to {file_path}: {e}")
             raise e
 
     def preprocessor(self, df: pd.DataFrame):
         try:
+            # Extracting categorical columns
             categorical_cols = df.select_dtypes(include=['object']).columns
             logging.info(f"The categorical columns are {categorical_cols}")
             
@@ -50,8 +59,8 @@ class ColumnTransformation(PreprocessorStrategy):
                 ]
             )
 
-            # For numerical columns
-            numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns
+            # Extracting numerical columns (excluding target column if mistakenly included)
+            numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns.difference(['Historical_Cost_of_Ride'])
             logging.info(f"The numerical columns are {numerical_cols}")
             
             num_pipeline = Pipeline(
@@ -127,6 +136,16 @@ class ColumnTransformation(PreprocessorStrategy):
                 obj=processing
             )
 
+            # Save transformed train and test arrays
+            self.save_object(
+                file_path=self.data_transformation_config.train_array_file_path,
+                obj=train_arr
+            )
+            self.save_object(
+                file_path=self.data_transformation_config.test_array_file_path,
+                obj=test_arr
+            )
+
             return (
                 train_arr,
                 test_arr,
@@ -137,8 +156,6 @@ class ColumnTransformation(PreprocessorStrategy):
             logging.error("Exception occurred in the transformation step: %s", str(e))
             raise e
 
-
-    
 
 if __name__ == "__main__":
     data_transformation = ColumnTransformation()
