@@ -1,26 +1,13 @@
 import os
 import logging
-from dataclasses import dataclass
-import pickle
 from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, GradientBoostingRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 from xgboost import XGBRegressor
-from src.components.utils import save_object, evaluate_models
-from src.components.data_transformation import ColumnTransformation
-from src.components.data_transformation import DataTransformationConfig
-from src.components.data_ingestion import DataIngestion
+from src.components.utils import save_object
+from src.config import ModelTrainerConfig  # Import from separate config file
 import sys
-
-# Ensuring the script finds logging_config correctly
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-from src.components.model_training import ModelTrainerConfig,ModelTrainer
-
-@dataclass
-class ModelTrainerConfig:
-    trained_model_file_path = os.path.join('artifacts', 'model.pkl')
-
 
 # Factory for model creation
 class ModelFactory:
@@ -33,7 +20,6 @@ class ModelFactory:
             "XGB Regressor": XGBRegressor(),
             "AdaBoost Regressor": AdaBoostRegressor()
         }
-
 
 # Model Evaluation Strategy to allow flexible metric selection
 class ModelEvaluationStrategy:
@@ -48,8 +34,7 @@ class ModelEvaluationStrategy:
         else:
             raise ValueError("Unsupported metric provided.")
 
-
-# Model Trainer using Builder pattern for optional configurations
+# Model Trainer class
 class ModelTrainer:
     def __init__(self, config=ModelTrainerConfig(), evaluation_strategy=ModelEvaluationStrategy()):
         self.config = config
@@ -69,7 +54,6 @@ class ModelTrainer:
             best_model_name, best_model_score = max(model_report.items(), key=lambda item: item[1])
             best_model = models[best_model_name]
 
-            # Check if the model meets a minimum performance threshold
             if best_model_score < 0.6:
                 logging.warning("No model achieved the minimum performance threshold.")
                 return None
@@ -85,9 +69,12 @@ class ModelTrainer:
     def train_and_evaluate_models(self, X_train, y_train, X_test, y_test, models):
         model_report = {}
         for model_name, model in models.items():
-            model.fit(X_train, y_train)
-            predictions = model.predict(X_test)
-            score = self.evaluation_strategy.evaluate(y_test, predictions)
-            model_report[model_name] = score
-            logging.info(f"{model_name} score: {score}")
+            try:
+                model.fit(X_train, y_train)
+                predictions = model.predict(X_test)
+                score = self.evaluation_strategy.evaluate(y_test, predictions)
+                model_report[model_name] = score
+                logging.info(f"{model_name} score: {score}")
+            except Exception as e:
+                logging.error(f"Error training {model_name}: {e}")
         return model_report

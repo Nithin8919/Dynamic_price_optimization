@@ -11,3 +11,4 @@ zenml
 scipy
 statsmodels
 DPyLearn
+mlflow

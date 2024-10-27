@@ -2,11 +2,9 @@ import logging
 import joblib
 from sklearn.metrics import r2_score
 import pickle
-import sys 
-
+import sys
 from sklearn.model_selection import GridSearchCV
 
-@staticmethod
 def save_object(file_path, obj):
     """Save the preprocessing object to a file."""
     try:
@@ -16,24 +14,20 @@ def save_object(file_path, obj):
     except Exception as e:
         logging.error("Failed to save the preprocessing object.")
         raise e
-def evaluate_models(X_train, y_train,X_test,y_test,models):
+
+def evaluate_models(X_train, y_train, X_test, y_test, models):
+    """Evaluate multiple models and return a report with R2 scores for each."""
     try:
         report = {}
 
         for i in range(len(list(models))):
             model = list(models.values())[i]
-            
-
-            model.fit(X_train,y_train)
-
-            #model.fit(X_train, y_train)  # Train model
+            model.fit(X_train, y_train)  # Train model
 
             y_train_pred = model.predict(X_train)
-
             y_test_pred = model.predict(X_test)
 
             train_model_score = r2_score(y_train, y_train_pred)
-
             test_model_score = r2_score(y_test, y_test_pred)
 
             report[list(models.keys())[i]] = test_model_score
@@ -42,11 +36,11 @@ def evaluate_models(X_train, y_train,X_test,y_test,models):
 
     except Exception as e:
         raise e
-    
+
 def load_object(file_path):
+    """Load an object from a file."""
     try:
         with open(file_path, "rb") as file_obj:
             return pickle.load(file_obj)
-
     except Exception as e:
         raise e
