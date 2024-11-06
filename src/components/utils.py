@@ -37,10 +37,12 @@ def evaluate_models(X_train, y_train, X_test, y_test, models):
     except Exception as e:
         raise e
 
+import joblib
+
 def load_object(file_path):
-    """Load an object from a file."""
     try:
         with open(file_path, "rb") as file_obj:
-            return pickle.load(file_obj)
+            return joblib.load(file_obj)
     except Exception as e:
+        logging.error(f"Failed to load object from {file_path}: {e}")
         raise e
