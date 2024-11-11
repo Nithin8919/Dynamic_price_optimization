@@ -21,6 +21,7 @@ class DataTransformationConfig:
     preprocessor_obj_file_path = os.path.join('artifacts', 'preprocessor.pkl')
     train_array_file_path = os.path.join('artifacts', 'train_array.pkl')
     test_array_file_path = os.path.join('artifacts', 'test_array.pkl')
+    feature_names_file_path = os.path.join('artifacts', 'feature_names.pkl')  # New: save feature names for debugging
 
 
 class PreprocessorStrategy(ABC):
@@ -122,6 +123,10 @@ class ColumnTransformation(PreprocessorStrategy):
             input_feature_train_arr = processing.fit_transform(input_feature_train_df)
             input_feature_test_arr = processing.transform(input_feature_test_df)
 
+            # Save feature names for debugging
+            feature_names = processing.get_feature_names_out()
+            self.save_object(self.data_transformation_config.feature_names_file_path, feature_names)
+
             # Combine input and target features into final training/testing arrays
             train_arr = np.c_[
                 input_feature_train_arr, np.array(target_feature_train_df)
@@ -129,6 +134,10 @@ class ColumnTransformation(PreprocessorStrategy):
             test_arr = np.c_[
                 input_feature_test_arr, np.array(target_feature_test_df)
             ]
+
+            # Debugging: Check array shapes after transformation
+            logging.info(f"Transformed train array shape: {train_arr.shape}")
+            logging.info(f"Transformed test array shape: {test_arr.shape}")
 
             # Save preprocessing object
             self.save_object(
