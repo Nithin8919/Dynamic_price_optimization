@@ -9,6 +9,7 @@ import pickle
 from src.components.utils import load_object
 import mlflow
 from urllib.parse import urlparse
+from zenml import step
 
 
 
@@ -17,7 +18,7 @@ class Model_evaluation:
     def __init__(self):
         logging.info("The model evaluation has initiated!.")
         pass
-    
+    @step
     def evaluate_model(self,actual,pred):
         mse = mean_squared_error(actual,pred)
         rmse = np.sqrt(mse)
@@ -25,7 +26,7 @@ class Model_evaluation:
         r2_score = r2_score(actual,pred)
         logging.info("evaluation metrics captured")
         return mse,rmse,mae,r2_score
-    
+    @step
     def initiate_model_evaluation(self, train_array, test_array):
         try:
             X_test, y_test = test_array[:,-1], test_array[:,-1]

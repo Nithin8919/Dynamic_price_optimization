@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from sqlalchemy import create_engine
 from abc import ABC, abstractmethod
+from zenml import step, pipeline
 
 # Singleton configuration class
 @dataclass
@@ -67,7 +68,7 @@ class DataIngestionFactory:
 class DataIngestion:
     def __init__(self):
         self.config = DataIngestionConfig()
-
+    @step
     def ingest_and_split(self, source_type: str, **kwargs):
         """Executes data ingestion and splits the data into train and test sets."""
         try:

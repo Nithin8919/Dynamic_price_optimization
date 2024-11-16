@@ -5,6 +5,7 @@ from src.components.data_transformation import ColumnTransformation
 from src.components.model_training import ModelTrainer
 from src.components.model_evaluation import Model_evaluation
 from src.logging_config import logging
+from zenml import step, pipeline
 
 class training_pipeline:
     def start_data_ingestion(self):
@@ -34,6 +35,7 @@ class training_pipeline:
             logging.error("There is prob in training tp.")
             raise e
     
+    @pipeline(enable_cache=False)
     def start_training(self):
             try:
                 train_data_path,test_data_path=self.start_data_ingestion()

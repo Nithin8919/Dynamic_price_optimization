@@ -7,6 +7,7 @@ from xgboost import XGBRegressor
 from src.components.utils import save_object
 from src.config import ModelTrainerConfig  # Import from separate config file
 import sys
+from zenml import step
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 # Factory for model creation
@@ -40,6 +41,7 @@ class ModelTrainer:
         self.config = config
         self.evaluation_strategy = evaluation_strategy
     
+    @step
     def initiate_model_training(self, train_array, test_array):
         try:
             logging.info("Initiating Model Training")

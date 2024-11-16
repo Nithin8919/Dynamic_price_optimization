@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import List
 from sklearn.impute import SimpleImputer
 import joblib
+from zenml import step
 import sys
 
 # Ensuring the script finds logging_config correctly
@@ -84,7 +85,7 @@ class ColumnTransformation(PreprocessorStrategy):
         except Exception as e:
             logging.error("Exception occurred in preprocessing")
             raise e
-    
+    @step
     def initiate_data_transformation(self, train_path, test_path):
         try:
             # Load datasets
